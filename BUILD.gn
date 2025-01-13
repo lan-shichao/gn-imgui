@@ -1,0 +1,76 @@
+import("//build/buildflag_header.gni")
+import("//build/config/c++/c++.gni")
+import("//build/config/compiler/compiler.gni")
+import("//build/config/jumbo.gni")
+import("//build_overrides/build.gni")
+
+if (is_ios) {
+  # Used to access ios_is_app_extension variable definition.
+  import("//build/config/ios/ios_sdk.gni")
+}
+
+if (is_win) {
+  import("//build/config/win/control_flow_guard.gni")
+}
+
+declare_args() {
+    use_imgui_dx11 = true
+    use_imgui_opengl3 = false
+    use_imgui_vulkan = false
+}
+
+static_library("imgui") {
+  sources = [
+    "src/imgui.cpp",
+    "src/imgui_demo.cpp",
+    "src/imgui_draw.cpp",
+    "src/imgui_internal.h",
+    "src/imgui_tables.cpp",
+    "src/imgui_widgets.cpp",
+  ]
+  if (is_win) {
+    sources += [
+      "src/backends/imgui_impl_win32.cpp",
+      "src/backends/imgui_impl_win32.h",
+    ]
+    if (use_imgui_dx11) {
+      sources += [
+        "src/backends/imgui_impl_dx11.cpp",
+        "src/backends/imgui_impl_dx11.h",
+      ]
+    }
+  }
+    if (use_imgui_opengl3) {
+      sources += [
+        "src/backends/imgui_impl_opengl3.cpp",
+        "src/backends/imgui_impl_opengl3.h",
+      ]
+    }
+    if (use_imgui_vulkan) {
+      sources += [
+        "src/backends/imgui_impl_vulkan.cpp",
+        "src/backends/imgui_impl_vulkan.h",
+      ]
+    }
+
+
+  include_dirs = [ "src" ]
+  all_dependent_configs = []
+  defines = []
+  data = []
+  data_deps = []
+  libs = []
+  frameworks = []
+  public_deps = []
+}
+
+
+executable("imgui_demo_win32_dx11") {
+  include_dirs = [ "src" , "src/backends" ]
+  sources = [ "src/examples/example_win32_directx11/main.cpp" ]
+
+  deps = [
+    ":imgui",
+  ]
+  libs = [ "d3d11.lib" ]
+}
